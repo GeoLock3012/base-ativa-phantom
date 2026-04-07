@@ -461,27 +461,30 @@
         const textAreaEl = document.getElementById('rawDataInput');
         const pasteOverlay = document.getElementById('pasteOverlay');
 
-        if (textAreaEl) {
-            textAreaEl.addEventListener('paste', async (e) => {
-                e.preventDefault();
+        // A MÁGICA GLOBAL DE COLAGEM (Escudo ativado)
+        // Usamos document.addEventListener para garantir a captura, já que o textarea readonly pode não disparar o 'paste' nativo em alguns browsers
+        document.addEventListener('paste', async (e) => {
+            // Ignora se o usuário estiver digitando no campo de Empresa ou de Busca
+            if (e.target.tagName === 'INPUT' && e.target.type === 'text') return;
+
+            e.preventDefault();
+            
+            const text = e.clipboardData ? e.clipboardData.getData('text/plain') : (window.clipboardData ? window.clipboardData.getData('Text') : '');
+            if (!text) return;
+
+            if (pasteOverlay) pasteOverlay.classList.remove('hidden');
+
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+            setTimeout(() => {
+                if (textAreaEl) textAreaEl.value = text;
                 
-                const text = e.clipboardData ? e.clipboardData.getData('text/plain') : (window.clipboardData ? window.clipboardData.getData('Text') : '');
-                if (!text) return;
-
-                if (pasteOverlay) pasteOverlay.classList.remove('hidden');
-
-                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-                setTimeout(() => {
-                    textAreaEl.value = text;
-                    
-                    requestAnimationFrame(() => {
-                        if (pasteOverlay) pasteOverlay.classList.add('hidden');
-                        showToast(`Dados carregados com sucesso.`, 2000);
-                    });
-                }, 15);
-            });
-        }
+                requestAnimationFrame(() => {
+                    if (pasteOverlay) pasteOverlay.classList.add('hidden');
+                    showToast(`Dados carregados com sucesso.`, 2000);
+                });
+            }, 15);
+        });
         
         const csvUpload = document.getElementById('csvUpload');
         if (csvUpload) {

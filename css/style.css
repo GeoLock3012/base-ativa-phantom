@@ -35,7 +35,6 @@ input:checked + .slider:before { transform: translateX(24px); }
 .company-input input.error { border-color: var(--accent-red); }
 .error-message { color: var(--accent-red); font-size: 12px; margin-top: 4px; display: none; }
 
-/* SEÇÃO DE UPLOAD E TEXTAREA NATIVO */
 .upload-wrapper { margin-bottom: 16px; background: var(--bg-primary); padding: 12px 16px; border-radius: var(--radius-md); border: 1px dashed var(--border-light); transition: border-color 0.2s; }
 .upload-wrapper:hover { border-color: var(--accent-blue); }
 .upload-label { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-secondary); cursor: pointer; font-weight: 500; flex-wrap: wrap; gap: 10px; }

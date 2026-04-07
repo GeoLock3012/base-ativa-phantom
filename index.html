@@ -15,12 +15,12 @@
     <link rel="preload" href="js/jspdf.umd.min.js" as="script">
     <link rel="preload" href="js/xlsx.full.min.js" as="script">
     
-    <link rel="stylesheet" href="css/style.css?v=31">
+    <link rel="stylesheet" href="css/style.css?v=33">
     
     <script src="js/chart.umd.min.js" defer></script>
     <script src="js/jspdf.umd.min.js" defer></script>
     <script src="js/xlsx.full.min.js" defer></script>
-    <script src="js/app.js?v=31" defer></script>
+    <script src="js/app.js?v=33" defer></script>
 </head>
 <body>
 
@@ -68,7 +68,16 @@
         </div>
         
         <div class="textarea-wrapper">
-            <textarea id="rawDataInput" rows="7" placeholder="Cole os dados da base aqui (formato: Placa | Chassi | Data | Estados)"></textarea>
+            <textarea 
+                id="rawDataInput" 
+                rows="7" 
+                placeholder="Cole os dados da base aqui (formato: Placa | Chassi | Data | Estados)"
+                spellcheck="false" 
+                data-gramm="false" 
+                data-gramm_editor="false" 
+                data-enable-grammarly="false"
+                data-lt-active="false"
+            ></textarea>
             <div class="paste-overlay hidden" id="pasteOverlay">
                 <div class="spinner"></div>
                 <div id="pasteProgressText">Alocando memória...</div>

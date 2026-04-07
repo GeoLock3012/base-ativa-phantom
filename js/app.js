@@ -6,9 +6,6 @@
     let attentionStates = ["Ignição desligada", "Motor desligado", "Falha pontual de cobertura GSM", "Tensão da bateria baixa", "Bateria desconectada"];
     let currentVehiclesData = []; let currentChart = null; let currentFilter = "Todos"; let currentSearchTerm = ""; let isProcessing = false; let currentSortColumn = "status"; let currentSortDirection = "asc"; let currentPage = 1;
     
-    // O Cofre: Variável da Colagem Fantasma
-    let phantomMemoryPayload = null; 
-    
     const ITEMS_PER_PAGE = 100;
     const MAX_LINES_LIMIT = 1500000; 
     
@@ -24,7 +21,6 @@
         currentFilter = "Todos"; currentSearchTerm = ""; currentSortColumn = "status"; currentSortDirection = "asc"; currentPage = 1;
         const companyInput = document.getElementById('companyName'); if (companyInput) companyInput.value = "";
         
-        phantomMemoryPayload = null;
         const textarea = document.getElementById('rawDataInput'); if (textarea) textarea.value = "";
         
         const searchInput = document.getElementById('searchInput'); if (searchInput) searchInput.value = "";
@@ -315,10 +311,9 @@
         if (isProcessing) { showToast("Processamento já em andamento."); return; }
         
         const textAreaEl = document.getElementById('rawDataInput');
-        // PUXA DO COFRE SE EXISTIR, SENÃO PUXA DO TEXTAREA
-        const rawText = phantomMemoryPayload !== null ? phantomMemoryPayload : (textAreaEl ? textAreaEl.value : ""); 
+        const rawText = textAreaEl ? textAreaEl.value : ""; 
         
-        if (!rawText.trim() || rawText.startsWith('📦') || rawText.startsWith('📁')) { 
+        if (!rawText.trim()) { 
             alert("Nenhum dado válido carregado no sistema."); 
             return; 
         }
@@ -467,9 +462,7 @@
         const pasteOverlay = document.getElementById('pasteOverlay');
 
         if (textAreaEl) {
-            // O MOTOR PHANTOM PASTE NATIVO (Zero travamento)
-            textAreaEl.addEventListener('paste', (e) => {
-                // 1. Proíbe o navegador de injetar o texto bruto no DOM (Acaba com o travamento instantaneamente)
+            textAreaEl.addEventListener('paste', async (e) => {
                 e.preventDefault();
                 
                 const text = e.clipboardData ? e.clipboardData.getData('text/plain') : (window.clipboardData ? window.clipboardData.getData('Text') : '');
@@ -477,35 +470,19 @@
 
                 if (pasteOverlay) pasteOverlay.classList.remove('hidden');
 
-                // 2. Joga a lógica para o próximo ciclo, garantindo que o overlay já apareceu
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        const linesCount = (text.match(/\n/g) || []).length + 1;
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-                        // O Limiar de Segurança (acima de 1000 linhas = Modo Fantasma)
-                        if (linesCount > 1000) {
-                            phantomMemoryPayload = text;
-                            textAreaEl.value = `📦 ${linesCount.toLocaleString()} registros carregados em memória.\n\n⚠️ O texto bruto não será renderizado aqui para evitar travamentos.\n👉 O sistema puxará os dados direto da memória RAM ao clicar em "Processar Base".\n\n(Se você apagar ou editar este texto, a memória será limpa).`;
-                        } else {
-                            phantomMemoryPayload = null;
-                            textAreaEl.value = text;
-                        }
-                        
+                setTimeout(() => {
+                    textAreaEl.value = text;
+                    
+                    requestAnimationFrame(() => {
                         if (pasteOverlay) pasteOverlay.classList.add('hidden');
-                        showToast(`Base carregada: ${linesCount.toLocaleString()} linhas.`, 3000);
-                    }, 10); // Pausa minúscula apenas para o reflow do CSS
-                });
-            });
-
-            // 3. Se o usuário alterar o texto, invalida a memória
-            textAreaEl.addEventListener('input', () => {
-                if (phantomMemoryPayload !== null) {
-                    phantomMemoryPayload = null;
-                }
+                        showToast(`Dados carregados com sucesso.`, 2000);
+                    });
+                }, 15);
             });
         }
         
-        // ROTA DE FUGA: UPLOAD DE CSV/TXT
         const csvUpload = document.getElementById('csvUpload');
         if (csvUpload) {
             csvUpload.addEventListener('change', (e) => {
@@ -519,18 +496,9 @@
                     const text = evt.target.result;
                     
                     setTimeout(() => {
-                        const linesCount = (text.match(/\n/g) || []).length + 1;
-                        
                         if (textAreaEl) {
-                            if (linesCount > 1000) {
-                                phantomMemoryPayload = text;
-                                textAreaEl.value = `📁 Arquivo carregado com sucesso!\n📦 ${linesCount.toLocaleString()} registros aguardando na memória.\n\n👉 Clique em "Processar Base" para iniciar.`;
-                            } else {
-                                phantomMemoryPayload = null;
-                                textAreaEl.value = text;
-                            }
+                            textAreaEl.value = text;
                         }
-                        
                         if (pasteOverlay) pasteOverlay.classList.add('hidden');
                         csvUpload.value = ''; 
                         showToast(`Arquivo processado com sucesso.`, 3000);

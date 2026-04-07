@@ -15,12 +15,12 @@
     <link rel="preload" href="js/jspdf.umd.min.js" as="script">
     <link rel="preload" href="js/xlsx.full.min.js" as="script">
     
-    <link rel="stylesheet" href="css/style.css?v=33">
+    <link rel="stylesheet" href="css/style.css?v=34">
     
     <script src="js/chart.umd.min.js" defer></script>
     <script src="js/jspdf.umd.min.js" defer></script>
     <script src="js/xlsx.full.min.js" defer></script>
-    <script src="js/app.js?v=33" defer></script>
+    <script src="js/app.js?v=34" defer></script>
 </head>
 <body>
 
@@ -71,8 +71,12 @@
             <textarea 
                 id="rawDataInput" 
                 rows="7" 
-                placeholder="Cole os dados da base aqui (formato: Placa | Chassi | Data | Estados)"
+                readonly
+                placeholder="Clique aqui e pressione Ctrl+V para colar os dados da base..."
                 spellcheck="false" 
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
                 data-gramm="false" 
                 data-gramm_editor="false" 
                 data-enable-grammarly="false"

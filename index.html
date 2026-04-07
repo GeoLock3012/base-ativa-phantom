@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; media-src 'none'; base-uri 'none'; form-action 'none';">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
+    <title>Base Ativa</title>
+    
+    <link rel="preload" href="js/chart.umd.min.js" as="script">
+    <link rel="preload" href="js/jspdf.umd.min.js" as="script">
+    <link rel="preload" href="js/xlsx.full.min.js" as="script">
+    
+    <link rel="stylesheet" href="css/style.css?v=31">
+    
+    <script src="js/chart.umd.min.js" defer></script>
+    <script src="js/jspdf.umd.min.js" defer></script>
+    <script src="js/xlsx.full.min.js" defer></script>
+    <script src="js/app.js?v=31" defer></script>
+</head>
+<body>
+
+<div id="appLoader" class="app-loader">
+    <div class="loader-content">
+        <div class="loader-spinner"></div>
+        <div class="loader-message" id="loaderMessage">Inicializando módulos...</div>
+        <div class="loader-progress-bar">
+            <div class="loader-progress-fill" id="loaderProgressFill"></div>
+        </div>
+    </div>
+</div>
+
+<div class="app-container">
+    <div class="header">
+        <div class="title-section">
+            <h1>📊 <span>Base Ativa</span> <span id="companyNameDisplay"></span></h1>
+        </div>
+        <div class="theme-toggle">
+            <span>☀️</span>
+            <label class="toggle-switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
+            <span>🌙</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="company-input">
+            <label>🏢 Nome da Empresa: <span class="required-asterisk">*</span></label>
+            <input type="text" id="companyName" placeholder="Coloque o nome da empresa...">
+        </div>
+        <div class="error-message" id="companyError">Por favor, informe o nome da empresa.</div>
+        
+        <div class="separator-selector">
+            <span>Separador de colunas:</span>
+            <label><input type="radio" name="separator" value="tab" checked> TAB (padrão Excel)</label>
+            <label><input type="radio" name="separator" value="semicolon"> ; (ponto e vírgula)</label>
+            <label><input type="radio" name="separator" value="auto"> Auto-detectar</label>
+        </div>
+
+        <div class="upload-wrapper">
+            <label for="csvUpload" class="upload-label">
+                <span>📁 Operação em Massa: Enviar arquivo (.csv, .txt)</span>
+                <input type="file" id="csvUpload" accept=".csv, .txt, .tsv">
+            </label>
+        </div>
+        
+        <div class="textarea-wrapper">
+            <textarea id="rawDataInput" rows="7" placeholder="Cole os dados da base aqui (formato: Placa | Chassi | Data | Estados)"></textarea>
+            <div class="paste-overlay hidden" id="pasteOverlay">
+                <div class="spinner"></div>
+                <div id="pasteProgressText">Alocando memória...</div>
+            </div>
+        </div>
+
+        <div class="progress-container hidden" id="progressContainer">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-text" id="progressText">Iniciando análise...</div>
+        </div>
+        <div class="btn-group">
+            <button id="processBtn">🔍 Processar Base</button>
+            <button id="exportPdfBtn" class="btn-secondary" disabled>📄 Exportar PDF</button>
+            <button id="exportCsvBtn" class="btn-secondary" disabled>📊 Exportar CSV</button>
+            <button id="exportExcelBtn" class="btn-secondary" disabled>📎 Exportar Excel</button>
+        </div>
+    </div>
+
+    <div id="resultsPanel" class="hidden">
+        <div class="status-cards-grid" id="statusCardsGrid"></div>
+        
+        <div class="card">
+            <div class="card-header"><h2 id="dashboardTitle">📊 Base Ativa</h2></div>
+            <div class="flex-chart-table">
+                <div class="chart-wrapper" id="chartContainer">
+                    <canvas id="donutChart" width="300" height="300"></canvas>
+                </div>
+                <div class="status-table-wrapper">
+                    <div class="summary-table-wrapper">
+                        <table class="status-summary-table" id="statusSummaryTable">
+                            <thead>
+                                <tr><th>Status</th><th>Quantidade</th><th>Percentual</th></tr>
+                            </thead>
+                            <tbody id="statusSummaryBody"></tbody>
+                         </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h2>📋 Detalhamento de Veículos</h2></div>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Buscar por placa ou chassi...">
+            </div>
+            <div class="filter-bar" id="filterBar"></div>
+            <div class="info-bar"><span id="recordInfo"></span><span id="sortInfo"></span><span id="filterCount"></span></div>
+            <div class="table-container" id="tableContainer">
+                <div class="virtual-table" id="virtualTable">
+                    <div class="virtual-header">
+                        <div class="virtual-cell" data-sort="plate">Placa</div>
+                        <div class="virtual-cell" data-sort="chassi">Chassi</div>
+                        <div class="virtual-cell" data-sort="date">Última Comunicação</div>
+                        <div class="virtual-cell" data-sort="status">Status</div>
+                        <div class="virtual-cell">Estado de Atenção</div>
+                    </div>
+                    <div id="virtualBody"></div>
+                </div>
+            </div>
+            <div class="pagination-controls" id="paginationControls"></div>
+        </div>
+    </div>
+</div>
+
+<div id="vehicleModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Detalhes do Registro</h3>
+            <span class="modal-close" id="closeModalBtn">&times;</span>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+</body>
+</html>
